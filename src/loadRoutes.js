@@ -6,6 +6,8 @@ import passport from 'passport';
 import { Strategy } from 'passport-local';
 import jwt from 'jwt-simple';
 
+import refreshTokensManager from './managers/refreshTokensManager.js';
+
 dotenv.config();
 
 const { PORT } = process.env;
@@ -88,14 +90,21 @@ app.get('/products',(request,response) => {
 //:Autenthicate an user
 
   app.post('/users/login',(request,response) => {
-    usersController.findUser(request,response);
+    usersController.userLogin(request,response);
   });
 
 //:Refresh token
 
-  app.post('users/refresh',(request,response) => {
+  app.post('/users/refresh',(request,response) => {
     usersController.refresh(request,response);
   });
+
+  app.get('/tokens', (request,response) => {
+    refreshTokensManager.findAllToken((err,tokens) => {
+      response.status(200).json(tokens);
+    })
+  })
+
 }
 
 

@@ -1,5 +1,5 @@
 import usersManager from '../managers/usersManager.js';
-import refreshTokenManager from '../managers/refreshTokenManager.js';
+import refreshTokensManager from '../managers/refreshTokensManager.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -11,7 +11,7 @@ class UsersController {
    * Find one user by its username
    */
 
-  findUser(request,response) {
+  userLogin(request,response) {
     usersManager.findOneUser(request.body,(err,user) => {
       if (err) {
         response.send({
@@ -30,10 +30,20 @@ class UsersController {
           });
         }
         if(result) {
-          const accessToken = jwt.sign({username: result.username, role: result.role}, accessTokenSecret);
-          const refreshToken = jwt.sign({userid: result._id, username: result.username}, accessTokenSecret);
+          const accessToken = jwt.sign({userid: user._id, username: user.username}, accessTokenSecret);
+          const refreshToken = jwt.sign({userid: user._id, username: user.username}, accessTokenSecret);
+          refreshTokensManager.addToken({value:refreshToken,user:user},(err) => {
+            if(err !== null) {
+              // response.status(400);
+              // response.send({
+              //   error: err.message
+              // });
+              // return;
+            }
+          });
           response.send({
-            accessToken
+            accessToken: accessToken,
+            refreshToken: refreshToken
           })
         }
         else {
@@ -42,8 +52,8 @@ class UsersController {
           });
         }
       })
-    })
-  }
+    });
+  };
 
   /**
    * Liste les users
@@ -60,7 +70,7 @@ class UsersController {
       }
       response.status(200).json(users);
     });
-  }
+  };
 
   /**
    * Ajoute un user
@@ -78,7 +88,7 @@ class UsersController {
         response.status(201).end();
       });
 
-  }
+  };
 
   /**
    * Retire un user
@@ -94,7 +104,7 @@ class UsersController {
         }
         response.end();
       });
-  }
+  };
 
   /**
    * Modifie un user
@@ -111,6 +121,23 @@ class UsersController {
         }
         response.status(202).end();
       });
+  };
+
+  refresh(request,response) {
+    refreshTokensManager.findOneToken(request.body.refreshToken,(err,token) => {
+      if(err !== null) {
+        response.status(400);
+        response.send({
+          error: error.message
+        });
+        return
+      }
+      const PAYLOAD = jwt.decode(token.value, {complete:true}).payload
+      const accessToken = jwt.sign(PAYLOAD, accessTokenSecret);
+      response.status(200).send({
+        accessToken: accessToken
+      });
+    })
   }
 }
 
