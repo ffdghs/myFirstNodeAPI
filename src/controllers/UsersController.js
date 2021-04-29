@@ -1,24 +1,53 @@
 import usersManager from '../managers/usersManager.js';
+import refreshTokenManager from '../managers/refreshTokenManager.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+const accessTokenSecret = 'ffdghsSecret';
 
 class UsersController {
 
   /**
-   * Liste les users
+   * Find one user by its username
    */
-  findUser(user,done,callback) {
-    usersManager.findOneUser(user,(err,user) => {
-      if (err) { return done(err); }
+
+  findUser(request,response) {
+    usersManager.findOneUser(request.body,(err,user) => {
+      if (err) {
+        response.send({
+        error: err.message
+      });
+      }
       if (!user) {
-        return done(null, false, { message: 'Incorrect username.' });
+        return response.send({
+          error: "this user doesn't exist"
+        });
       }
-      if (!user.validPassword(password)) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-      return done(null, user);
+      bcrypt.compare(request.body.password, user.password, (err, result) => {
+        if(err) {
+          response.send({
+            error: err.message
+          });
+        }
+        if(result) {
+          const accessToken = jwt.sign({username: result.username, role: result.role}, accessTokenSecret);
+          const refreshToken = jwt.sign({userid: result._id, username: result.username}, accessTokenSecret);
+          response.send({
+            accessToken
+          })
+        }
+        else {
+          response.send({
+            error: "the password is not valid"
+          });
+        }
+      })
     })
   }
 
-
+  /**
+   * Liste les users
+   */
 
   listUsers(request,response) {
     usersManager.findAllUsers((err,users) => {
@@ -70,6 +99,7 @@ class UsersController {
   /**
    * Modifie un user
    */
+
   modifyUser(request,response) {
       usersManager.modfifyUser(request.body,request.params.id,(err) => {
         if(err !== null) {

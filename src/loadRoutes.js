@@ -18,56 +18,84 @@ export default function loadRoutes(app) {
 
   passport.use(new Strategy((username,password,done) => {
     usersController.findUser(username,done,()=>{
-
     });
-    // usersController.findUser(token,done);
   }))
 
-  app.use(express.json());
 
-  app.post('/login',passport.authenticate('local',{ session: false }),(request,response) => {
-    usersController.findUser(request,response);
-  })
 
-  app.listen(PORT, () => {
-    console.log(`The server is listening on port ${PORT}`);
-  })
+  // app.post('/login',passport.authenticate('local',{ session: false }),(request,response) => {
+  //   usersController.findUser(request,response);
+  // })
 
-  // PRODUCTS
-  app.get('/products',(request,response) => {
-    productsController.listProducts(request,response);
-  })
+
+//************************************
+//******** Products routes ***********
+//************************************
+
+//:Products List
+
+app.get('/products',(request,response) => {
+  productsController.listProducts(request,response);
+});
+
+//:Add a product
 
   app.post('/products',(request,response) => {
     productsController.addProduct(request,response);
-  })
+  });
+
+//:Delete a product
 
   app.delete('/products/:id',(request,response) => {
     productsController.deleteProduct(request,response);
-  })
+  });
+
+//:Modify a product
 
   app.put('/products/:id',(request,response) => {
     productsController.modifyProduct(request,response);
-  })
+  });
 
-  // USERS
+
+//************************************
+//********* Users routes *************
+//************************************
+
+//:Users list
+
   app.get('/users',(request,response)=>{
     usersController.listUsers(request,response);
-  })
+  });
 
-  app.post('/users',(request,response) => {
+//:Add an user (signup)
+
+  app.post('/users/signup',(request,response) => {
     usersController.addUser(request,response);
-  })
+  });
 
+//:Delete an user
 
   app.delete('/users/:id',(request,response) => {
     usersController.deleteUser(request,response);
-  })
+  });
+
+//: Modify an user
 
   app.put('/users/:id',(request,response) => {
     usersController.modifyUser(request,response);
-  })
+  });
 
+//:Autenthicate an user
+
+  app.post('/users/login',(request,response) => {
+    usersController.findUser(request,response);
+  });
+
+//:Refresh token
+
+  app.post('users/refresh',(request,response) => {
+    usersController.refresh(request,response);
+  });
 }
 
 

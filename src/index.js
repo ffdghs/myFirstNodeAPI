@@ -5,9 +5,15 @@ import loadRoutes from './loadRoutes.js';
 
 dotenv.config();
 
-const { DATABASE_URL } = process.env;
+const { PORT, DATABASE_URL } = process.env;
 
 const app = express();
+
+app.listen(PORT, () => {
+  console.log(`The server is listening on port ${PORT}`);
+})
+
+app.use(express.json());
 
 loadRoutes(app);
 

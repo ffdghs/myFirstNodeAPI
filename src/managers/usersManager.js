@@ -8,7 +8,7 @@ class UsersManager {
   }
 
   findOneUser(user, callback) {
-    User.findOne({ username: user }, (err,user) => {
+    User.findOne({ username: user.username }, (err,user) => {
       callback(err,user)
     })
   }
