@@ -1,29 +1,19 @@
 import productsController from './controllers/ProductsController.js';
 import usersController from './controllers/UsersController.js';
-import express from 'express';
 import dotenv from 'dotenv';
-import passport from 'passport';
-import { Strategy } from 'passport-local';
-import jwt from 'jwt-simple';
+// import passport from 'passport';
+// import { Strategy } from 'passport-local';
 
 import refreshTokensManager from './managers/refreshTokensManager.js';
 
 dotenv.config();
 
-const { PORT } = process.env;
-
-const ADMIN = 'admin';
-const ADMIN_PASSWORD = 'password';
-const SECRET = 'mysecret';
-
 export default function loadRoutes(app) {
 
-  passport.use(new Strategy((username,password,done) => {
-    usersController.findUser(username,done,()=>{
-    });
-  }))
-
-
+  // passport.use(new Strategy((username,password,done) => {
+  //   usersController.findUser(username,done,()=>{
+  //   });
+  // }))
 
   // app.post('/login',passport.authenticate('local',{ session: false }),(request,response) => {
   //   usersController.findUser(request,response);
